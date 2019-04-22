@@ -25,7 +25,7 @@ class GesturesApp(QtWidgets.QMainWindow, design.Ui_LibinputGesturesGUI):
             'Pinch Anticlockwise': 'gesture pinch anticlockwise',
         }
 
-        self.action = 'Swipe Up'
+        self.action = 'gesture swipe up'
         self.fingers = 0
         self.shortcut = ''
         
@@ -51,8 +51,9 @@ class GesturesApp(QtWidgets.QMainWindow, design.Ui_LibinputGesturesGUI):
                 new_conf = []
                 for line in conf:
                     if not line.startswith(self.action):
-                       new_conf.append(line)
+                       new_conf.append(line.replace('\n', ''))
                 new_conf.append('{}\t{} xdotool key {}'.format(self.action, str(self.fingers), self.shortcut))
+                print(new_conf)
                 config.write('\n'.join(new_conf))
 
 
