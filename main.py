@@ -63,6 +63,11 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
         self.actionAdd.triggered.connect(self.start_adding)
         self.actionRefresh.triggered.connect(self.refresh)
+        
+        self.actionStatus.triggered.connect(self.display_status)
+        self.actionRestart.triggered.connect(self.restart_utility)
+        self.actionStop.triggered.connect(self.stop_utility)
+        self.actionStart.triggered.connect(self.start_utility)
 
         self.pushButton.clicked.connect(self.start_adding)
 
@@ -78,6 +83,40 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
     def refresh(self):
         self.display_config(refresh=True)
+    
+    def display_status(self):
+        if self.installed:
+            status = subprocess.run(['libinput-gestures-setup', 'status'], capture_output=True)
+            status = status.stdout.decode('utf-8')
+            installed = 'no'
+            if 'is installed' in status:
+                installed = 'yes'
+            running = 'no'
+            if 'is running' in status:
+                running = 'yes'
+            set_to_autostart = 'no'
+            if 'is set to autostart' in status:
+                set_to_autostart = 'yes'
+            status = 'Installed: {}\nRunning: {}\nAutostart: {}\n'.format(installed, running, set_to_autostart)
+            QtWidgets.QMessageBox.about(self, "Status", status)
+    
+    def restart_utility(self):
+        if self.installed:
+            status = subprocess.run(['libinput-gestures-setup', 'restart'], capture_output=True)
+            status = status.stdout.decode('utf-8')
+            QtWidgets.QMessageBox.about(self, "Status", status)
+    
+    def stop_utility(self):
+        if self.installed:
+            status = subprocess.run(['libinput-gestures-setup', 'stop'], capture_output=True)
+            status = status.stdout.decode('utf-8')
+            QtWidgets.QMessageBox.about(self, "Status", status)
+    
+    def start_utility(self):
+        if self.installed:
+            status = subprocess.run(['libinput-gestures-setup', 'start'], capture_output=True)
+            status = status.stdout.decode('utf-8')
+            QtWidgets.QMessageBox.about(self, "Status", status)
 
     def display_config(self, refresh=False):
         if refresh:
