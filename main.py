@@ -76,13 +76,15 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         gestures = []
         fingers = []
         shortcuts = []
+        buttons = []
         for line in conf:
             if line.startswith('gesture'):
                 splitted = line.replace('\t', ' ').split()
+                action = '{} {} {}'.format(splitted[0], splitted[1], splitted[2])
                 gestures.append(QtWidgets.QLabel(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])]))
                 fingers.append(QtWidgets.QLabel(splitted[3]))
                 shortcuts.append(QtWidgets.QLabel(splitted[6]))
-
+                buttons.append(action)
         self.layout = self.verticalLayout
 
         self.area = QtWidgets.QScrollArea()
@@ -100,7 +102,25 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         for i, label in enumerate(shortcuts):
             flay.addWidget(label, i, 2)
 
+        for i, button in enumerate(buttons):
+            #Stupid but I can't find any other solution!
+            def set_delete_gesture():
+                delete_gesture = button
+                self.delete_entry(delete_gesture)
+            deleteButton = QtWidgets.QPushButton("Delete")
+            deleteButton.setAccessibleName(button)
+            deleteButton.clicked.connect(self.delete_entry)
+            flay.addWidget(deleteButton, i, 3)
+
         self.layout.addWidget(self.area)
+
+    def delete_entry(self):
+        button = self.sender()
+        if isinstance(button, QtWidgets.QPushButton):
+            conf = read_config()
+            new_conf = [line for line in conf if not line.startswith(button.accessibleName())]
+            write_config(new_conf)
+            self.display_config(refresh=True)
 
         
         
