@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtCore
 import main_window
 import edit_window
 
+import subprocess
 from pathlib import Path
 
 HOME = str(Path.home())
@@ -38,7 +39,6 @@ reversed_mapping = {
     'gesture pinch anticlockwise': 'Pinch Anticlockwise'
 }
 
-
 def read_config():
     with open(CONFIG_LOCATION, 'r') as config:
         conf = config.readlines()
@@ -54,6 +54,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
+        self.setWindowTitle('Libinput Gestures Qt')
 
         self.display_config()
 
@@ -62,6 +63,15 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
         self.actionAdd.triggered.connect(self.start_adding)
         self.actionRefresh.triggered.connect(self.refresh)
+
+        self.pushButton.clicked.connect(self.start_adding)
+
+        try:
+            subprocess.run(['libinput-gestures-setup', 'status'])
+            self.installed = True
+        except FileNotFoundError:
+            QtWidgets.QMessageBox.about(self, "Problem", "Cannot find libinput-gestures. Are you sure it is installed correctly?")
+            self.installed = False
 
     def start_adding(self):
         self.adding.show()
@@ -103,10 +113,6 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             flay.addWidget(label, i, 2)
 
         for i, button in enumerate(buttons):
-            #Stupid but I can't find any other solution!
-            def set_delete_gesture():
-                delete_gesture = button
-                self.delete_entry(delete_gesture)
             deleteButton = QtWidgets.QPushButton("Delete")
             deleteButton.setAccessibleName(button)
             deleteButton.clicked.connect(self.delete_entry)
@@ -128,10 +134,13 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setWindowTitle('Add Gestures')
 
         self.action = ''
         self.fingers = 0
         self.shortcut = ''
+
+        self.fingersLine.setMinimum(2)
         
         self.actionMenu.activated[str].connect(self.action_chosen)
         self.fingersLine.valueChanged[int].connect(self.fingers_chosen)
