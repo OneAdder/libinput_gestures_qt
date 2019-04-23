@@ -123,10 +123,17 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def delete_entry(self):
         button = self.sender()
         if isinstance(button, QtWidgets.QPushButton):
-            conf = read_config()
-            new_conf = [line for line in conf if not line.startswith(button.accessibleName())]
-            write_config(new_conf)
-            self.display_config(refresh=True)
+            reply = QtWidgets.QMessageBox.question(
+                self, 'Message',
+                "Are you sure to delete?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No
+            )
+            if reply == QtWidgets.QMessageBox.Yes:
+                conf = read_config()
+                new_conf = [line for line in conf if not line.startswith(button.accessibleName())]
+                write_config(new_conf)
+                self.display_config(refresh=True)
 
         
         
