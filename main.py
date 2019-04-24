@@ -204,22 +204,18 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         for i, el in enumerate(self.gestures):
             for_sorting.append([el, (self.fingers[i], self.shortcuts[i], self.buttons[i], self.actions[i])])
         sorted_conf = sorted(for_sorting)
-        #print(sorted_conf)
-        '''
-        od = collections.OrderedDict(sorted(d.items()))
+        
         self.gestures = []
         self.fingers = []
         self.shortcuts = []
         self.buttons = []
         self.actions = []
-        for gesture in od:
-            value = od[gesture]
-            self.gestures.append(gesture)
-            self.fingers.append(value[0])
-            self.shortcuts.append(value[1])
-            self.buttons.append(value[2])
-            self.actions.append(value[3])
-            '''
+        for line in sorted_conf:
+            self.gestures.append(line[0])
+            self.fingers.append(line[1][0])
+            self.shortcuts.append(line[1][1])
+            self.buttons.append(line[1][2])
+            self.actions.append(line[1][3])
     
     def prepare_config_for_displaying(self):
         conf = read_config()
