@@ -1,4 +1,4 @@
-"""libinput-gestures-qt. User interface for the libinput-gestures utility. 
+'''libinput-gestures-qt. User interface for the libinput-gestures utility. 
     Copyright (C) 2019  Michael Voronov
 
     This program is free software: you can redistribute it and/or modify
@@ -13,6 +13,37 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
+"""
+This is a GUI for libinout-gestures-utility. Allows to set up touchpad gestures:
+allows to edit the configuration file and control utility status.
+
+Variables:
+--------------
+Paths:
+-----
+HOME: str
+    path to user's home directory
+CONFIG_LOCATION: str
+    path to the location of the configuration file
+Mappings:
+--------
+actions_mapping: dict
+    finger actions in human-readable form >> finger actions in config-readable form
+reversed_mapping: dict
+    finger actions in config-readable form >> finger actions in human-readable form
+keys_mapping: dict
+    qt keys (lowered) >> xdotool keys
+    
+--------------
+Classes:
+GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow)
+    Main window.
+EditGestures(QtWidgets.QWidget, edit_window.Ui_Form)
+    Secondary window for adding/editing gestures.
+--------------
+Functions: read_config, write_config, find_key_combo, main
+--------------
 """
 
 import sys
@@ -81,6 +112,11 @@ keys_mapping = {
 }
 
 def read_config():
+    """Reads config file by lines
+    
+    Config under CONFIG_LOCATION = ~/.config/libinput-gestures.conf
+    Returns '' if there is no config file.
+    """
     try:
         with open(CONFIG_LOCATION, 'r') as config:
             conf = config.readlines()
@@ -90,11 +126,23 @@ def read_config():
 
 
 def write_config(new_conf):
+    """Writes config under CONFIG_LOCATION
+    
+    Parameter: new_conf, list of strings
+    """
     with open(CONFIG_LOCATION, 'w') as config:
         config.write(''.join(new_conf))
 
 
 def fix_config():
+    """Fixes config
+    
+    Reads config, goes by lines.
+    If lise starts with '#', it is preserved.
+    If line starts with 'gesture', 'device' or 'swipe_threshold'
+        and this line is ok, it is preserved.
+    Other lines are deleted.
+    """
     conf = read_config()
     fixed_conf = []
     for line in conf:
@@ -130,10 +178,21 @@ def find_key_combo(qt_key_combo):
         else:
             xdotool_key_combo.append(lowered_key)
     return '+'.join(xdotool_key_combo)
-#print(find_key_combo('Alt+Meta+A+Right'))
+
 
 class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
+    """Main window.
+    
+    Display current configuration, menubar and the 'Add' button.
+    """
     def __init__(self, parent=None):
+        """init
+        
+        Calls for self.display_config() and adds triggers to all the events.
+        Tries to launch libinput-gestures-setup:
+            if it works, sets self.installed to True
+            if not sets self.installed to False
+        """
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
@@ -158,14 +217,17 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             self.installed = False
 
     def start_adding(self):
+        """Shows EditGestures window"""
         self.adding = EditGestures(self)
         self.adding.setWindowModality(QtCore.Qt.WindowModal)
         self.adding.show()
 
     def refresh(self):
+        """Refresh content of the main window"""
         self.display_config(refresh=True)
     
     def display_status(self):
+        """Check status of libinput-gestures and shows it in message box"""
         if self.installed:
             status = subprocess.run(['libinput-gestures-setup', 'status'], capture_output=True)
             status = status.stdout.decode('utf-8')
@@ -182,24 +244,48 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             QtWidgets.QMessageBox.about(self, "Status", status)
     
     def restart_utility(self):
+        """Runs 'libinput-gestures-setup restart', displays output in message box"""
         if self.installed:
             status = subprocess.run(['libinput-gestures-setup', 'restart'], capture_output=True)
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
     
     def stop_utility(self):
+        """Runs 'libinput-gestures-setup stop', displays output in message box"""
         if self.installed:
             status = subprocess.run(['libinput-gestures-setup', 'stop'], capture_output=True)
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
     
     def start_utility(self):
+        """Runs 'libinput-gestures-setup start', displays output in message box"""
         if self.installed:
             status = subprocess.run(['libinput-gestures-setup', 'start'], capture_output=True)
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
 
     def sort_config(self):
+        """Sorts config contents alphabetically.
+        
+        Assigns new values for:
+            self.gestures: list of str
+                finger actions in human-readable form
+                e.g. ['Swipe Up']
+            self.fingers: list of int
+                amount of fingers
+                e.g. [3]
+            self.shortcuts: list of str
+                keyboard shortcuts (in the xdotool form)
+                OR commands
+                e.g. ['ctrl+super+Page_Down']
+                e.g. ['echo "Hello"']
+            self.buttons: list of str
+                finger action in config-readable form
+                e.g. ['gesture swipe up']
+            self.actions: list of str
+                either 'shortcut' (stands for a keyboard shortcut)
+                or 'command'
+        """
         for_sorting = []
         for i, el in enumerate(self.gestures):
             for_sorting.append([el, (self.fingers[i], self.shortcuts[i], self.buttons[i], self.actions[i])])
@@ -218,6 +304,27 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             self.actions.append(line[1][3])
     
     def prepare_config_for_displaying(self):
+        """Creates widgets for all stuff read from config
+        
+        Assigns new values for:                                                         V-----------------------------------V
+            self.gestures: list of str                   <============ Translates from 'gesture <type:swipe|pinch> <direction> ...'
+                finger actions in human-readable form
+                e.g. ['Swipe Up']                                                                       V-------V
+            self.fingers: list of int                    <============ Exact values of  '... <direction> <fingers> <command>...'
+                amount of fingers
+                e.g. [3]                                                                               V-------V
+            self.shortcuts: list of str                  <======------ Exact values of  '... <fingers> <command>'
+                keyboard shortcuts (in the xdotool form)        \ <<or>>                                         V-----------------V
+                OR commands                                      ----- Exact values of '... <fingers> xdotool key <keyboard_shortcut>
+                e.g. ['ctrl+super+Page_Down']                     
+                e.g. ['echo "Hello"']                                                    V------------------------------------V
+            self.buttons: list of str                    <============ Exact values of  'gesture <type:swipe|pinch> <direction> ...'
+                finger action in config-readable form
+                e.g. ['gesture swipe up']
+            self.actions: list of str                    <============ Depend on whether xdotool is used in config line
+                either 'shortcut' (stands for a keyboard shortcut)
+                or 'command'
+        """
         conf = read_config()
         self.gestures = []
         self.fingers = []
@@ -239,6 +346,10 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 self.buttons.append(action)
 
     def display_config(self, refresh=False):
+        """Displays current configuration in main window
+        
+        Finally gathers all widgets (creates a couple new) and puts them into nice layouts.
+        """
         if refresh:
             self.area.deleteLater()
         
@@ -287,6 +398,10 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.layout.addWidget(self.area)
 
     def delete_entry(self):
+        """Delete line from config
+        
+        Triggered by 'Delete' buttons.
+        """
         button = self.sender()
         if isinstance(button, QtWidgets.QPushButton):
             reply = QtWidgets.QMessageBox.question(
@@ -303,7 +418,16 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         
         
 class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
+    """Secondary window for adding/editing gestures
+    
+    Child to main window (GesturesApp).
+    """
     def __init__(self, parent):
+        """init
+        
+        Sets widgets and their attributes that I could not set in QT Designer.
+        Adds events to buttons.
+        """
         super().__init__()
         self.setupUi(self)
         self.parent = parent
@@ -323,24 +447,39 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.saveButton.clicked.connect(self.save_changes)
 
     def shortcut_or_command(self, text):
+        """Chose whether you want to add plain command or xdotool command using QKeySequenceEdit
+        
+        Does not delete previous widgets: they are stored one upon another.
+        HELP NEEDED -- it works but it's stupid :(
+        """
         if text == 'Keyboard Shortcut':
             self.draw_shortcut()
         else:
             self.draw_command()
 
     def draw_shortcut(self):
+        """Draws keyboard shortcut input
+        
+        ... so that user could just press buttons (sh|h)e wants
+        istead of manually typing 'xdotool key <key combo>' and remember differences between xdotool/Gnome/KDE/etc.
+        """
         self.actionType.setText('Keyboard Shortcut')
         self.keyboardLine = QtWidgets.QKeySequenceEdit()
         self.gridLayout.addWidget(self.keyboardLine, 4, 2)
         self.keyboardLine.keySequenceChanged.connect(self.shortcut_chosen)
         
     def draw_command(self):
+        """Draws command input
+        
+        ... because I don't want users to be stuck with xdotool
+        """
         self.actionType.setText('Command')
         self.commandLine = QtWidgets.QLineEdit()
         self.gridLayout.addWidget(self.commandLine, 4, 2)
         self.commandLine.textChanged[str].connect(self.command_chosen)
 
     def action_chosen(self, text):
+        """Event when fingers action is chosen"""
         if 'Pinch' in text:
             self.fingersLine.setMinimum(2)
             self.fingersLine.setValue(2)
@@ -350,16 +489,20 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.action = actions_mapping[text]
 
     def fingers_chosen(self, value):
+        """Event when amount of fingers is chosen"""
         self.fingers = value
 
     def shortcut_chosen(self, text):
+        """Event when keyboard shortcut is chosen"""
         shortcut = text.toString().split(',')[0]
         self.shortcut = 'xdotool key ' + find_key_combo(shortcut)
 
     def command_chosen(self, text):
+        """Event when command is typed in"""
         self.shortcut = text
 
     def save_changes(self):
+        """Writes input data into config file"""
         if self.action and self.fingers and self.shortcut:
             conf = read_config()
             new_conf = []
