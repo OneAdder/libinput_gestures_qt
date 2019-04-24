@@ -74,6 +74,28 @@ def write_config(new_conf):
     with open(CONFIG_LOCATION, 'w') as config:
         config.write(''.join(new_conf))
 
+
+def fix_config():
+    conf = read_config()
+    fixed_conf = []
+    for line in conf:
+        if line.startswith('#'):
+            fixed_conf.append(line)
+        else:
+            splitted = line.replace('\t', ' ').split()
+            if splitted[0] in ['gesture', 'device', 'swipe_threshold']:
+                if splitted[0] == 'gesture':
+                    if splitted[4] == 'xdotool':
+                        if splitted[5] == 'key' and len(splitted) == 7:
+                            fixed_conf.append(line)
+                    else:
+                        fixed_conf.append(line)
+                else:
+                    if len(splitted) == 2:
+                        fixed_conf.append(line)
+                
+
+
 def find_key_combo(qt_key_combo):
     """Key combo translator
     
@@ -157,50 +179,66 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             status = subprocess.run(['libinput-gestures-setup', 'start'], capture_output=True)
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
-
-    def display_config(self, refresh=False):
-        if refresh:
-            self.area.deleteLater()
+    
+    def prepare_config_for_displaying(self):
         conf = read_config()
-        gestures = []
-        fingers = []
-        shortcuts = []
-        buttons = []
-        actions = []
+        self.gestures = []
+        self.fingers = []
+        self.shortcuts = []
+        self.buttons = []
+        self.actions = []
         for line in conf:
             if line.startswith('gesture'):
                 splitted = line.replace('\t', ' ').split()
                 action = '{} {} {}'.format(splitted[0], splitted[1], splitted[2])
-                gestures.append(QtWidgets.QLabel(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])]))
-                fingers.append(QtWidgets.QLabel(splitted[3]))
+                self.gestures.append(QtWidgets.QLabel(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])]))
+                self.fingers.append(QtWidgets.QLabel(splitted[3]))
                 if splitted[4] == 'xdotool' and splitted[5] == 'key':
-                    actions.append(QtWidgets.QLabel('shortcut'))
-                    shortcuts.append(QtWidgets.QLabel(splitted[6]))
+                    self.actions.append(QtWidgets.QLabel('shortcut'))
+                    self.shortcuts.append(QtWidgets.QLabel(splitted[6]))
                 else:
-                    actions.append(QtWidgets.QLabel('command'))
-                    shortcuts.append(QtWidgets.QLabel(' '.join(splitted[4:])))
-                buttons.append(action)
-        self.layout = self.verticalLayout
+                    self.actions.append(QtWidgets.QLabel('command'))
+                    self.shortcuts.append(QtWidgets.QLabel(' '.join(splitted[4:])))
+                self.buttons.append(action)
 
+    def display_config(self, refresh=False):
+        if refresh:
+            self.area.deleteLater()
+        
+        try:
+            self.prepare_config_for_displaying()
+        except Exception:
+            reply = QtWidgets.QMessageBox.question(
+                self, 'Problem',
+                "Something is wrong with the configuration file...\nFix it?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No
+            )
+            if reply == QtWidgets.QMessageBox.Yes:
+                fix_config()
+            else:
+                sys.exit()
+        
+        self.layout = self.verticalLayout
         self.area = QtWidgets.QScrollArea()
         content_widget = QtWidgets.QWidget()
         self.area.setWidget(content_widget)
         flay = QtWidgets.QGridLayout(content_widget)
         self.area.setWidgetResizable(True)
 
-        for i, label in enumerate(gestures):
+        for i, label in enumerate(self.gestures):
             flay.addWidget(label, i, 0)
 
-        for i, label in enumerate(fingers):
+        for i, label in enumerate(self.fingers):
             flay.addWidget(label, i, 1)
 
-        for i, label in enumerate(actions):
+        for i, label in enumerate(self.actions):
             flay.addWidget(label, i, 2)
 
-        for i, label in enumerate(shortcuts):
+        for i, label in enumerate(self.shortcuts):
             flay.addWidget(label, i, 3)
 
-        for i, button in enumerate(buttons):
+        for i, button in enumerate(self.buttons):
             deleteButton = QtWidgets.QPushButton("Delete")
             deleteButton.setAccessibleName(button)
             deleteButton.clicked.connect(self.delete_entry)
