@@ -2,20 +2,21 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.12
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(590, 511)
+        MainWindow.resize(791, 598)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(30, 20, 521, 44))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(30, 20, 741, 44))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
@@ -37,13 +38,13 @@ class Ui_MainWindow(object):
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 0, 3, 1, 1)
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(30, 70, 521, 341))
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(30, 70, 741, 401))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(29, 420, 521, 39))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(30, 480, 741, 44))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -53,7 +54,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.pushButton)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 590, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 791, 38))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -103,4 +104,5 @@ class Ui_MainWindow(object):
         self.actionStart.setText(_translate("MainWindow", "S&tart"))
         self.actionStop.setText(_translate("MainWindow", "St&op"))
         self.actionRefresh.setText(_translate("MainWindow", "&Refresh"))
+
 
