@@ -201,20 +201,21 @@ def fix_config():
     conf = read_config()
     fixed_conf = []
     for line in conf:
-        if line.startswith('#'):
-            fixed_conf.append(line)
-        else:
-            splitted = line.replace('\t', ' ').split()
-            if splitted[0] in ['gesture', 'device', 'swipe_threshold']:
-                if splitted[0] == 'gesture':
-                    if splitted[4] == 'xdotool':
-                        if splitted[5] == 'key' and len(splitted) == 7:
+        if line and line != '\n':
+            if line.startswith('#'):
+                fixed_conf.append(line)
+            else:
+                splitted = line.replace('\t', ' ').split()
+                if splitted[0] in ['gesture', 'device', 'swipe_threshold']:
+                    if splitted[0] == 'gesture':
+                        if splitted[4] == 'xdotool':
+                            if splitted[5] == 'key' and len(splitted) == 7:
+                                fixed_conf.append(line)
+                        else:
                             fixed_conf.append(line)
                     else:
-                        fixed_conf.append(line)
-                else:
-                    if len(splitted) == 2:
-                        fixed_conf.append(line)
+                        if len(splitted) == 2:
+                            fixed_conf.append(line)
     write_config(''.join(fixed_conf))
 
 def resub_config():
@@ -267,9 +268,9 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
         #Menubar actions <--
         #File
-        self.actionAdd.triggered.connect(self.start_adding)
         self.actionRefresh.triggered.connect(self.refresh)
         self.actionSet_to_default_KDE.triggered.connect(self.set_KDE_default)
+        self.actionImport_config_file.triggered.connect(self.import_config)
         
         #Service
         self.actionStatus.triggered.connect(self.display_status)
@@ -288,16 +289,17 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             QtWidgets.QMessageBox.about(self, "Problem", "Cannot find libinput-gestures. Are you sure it is installed correctly?")
             self.installed = False
 
-    '''
-    File Menu
-    _____________________________________________________________________________________________
-    '''
+
     def start_adding(self):
         """Shows EditGestures window"""
         self.adding = EditGestures(self)
         self.adding.setWindowModality(QtCore.Qt.WindowModal)
         self.adding.show()
 
+    '''
+    File Menu
+    _____________________________________________________________________________________________
+    '''
     def refresh(self):
         """Refresh content of the main window"""
         self.display_config(refresh=True)
@@ -313,6 +315,16 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         if reply == QtWidgets.QMessageBox.Yes:
             write_defaults(kde_defaults)
             self.display_config(refresh=True)
+
+    def import_config(self):
+        fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Import', HOME)
+        with open(fname[0]) as f:
+            imported_config = f.readlines()
+        write_config(imported_config)
+        resub_config()
+        fix_config()
+        self.display_config(refresh=True)
+        
 
     '''
     Service Menu

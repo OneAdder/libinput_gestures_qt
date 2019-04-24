@@ -83,9 +83,9 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionAdd"/>
     <addaction name="actionRefresh"/>
     <addaction name="actionSet_to_default_KDE"/>
+    <addaction name="actionImport_config_file"/>
    </widget>
    <widget class="QMenu" name="menuService">
     <property name="title">
@@ -140,17 +140,22 @@
   </action>
   <action name="actionSet_to_default_KDE">
    <property name="text">
-    <string>Set to default (KDE)</string>
+    <string>&amp;Set to default (KDE)</string>
    </property>
   </action>
   <action name="actionDefaults_KDE_Plasma">
    <property name="text">
-    <string>Defaults (KDE Plasma)</string>
+    <string>&amp;Defaults (KDE Plasma)</string>
    </property>
   </action>
   <action name="actionLicense">
    <property name="text">
-    <string>License</string>
+    <string>&amp;License</string>
+   </property>
+  </action>
+  <action name="actionImport_config_file">
+   <property name="text">
+    <string>Import config file</string>
    </property>
   </action>
  </widget>
