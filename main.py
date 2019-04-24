@@ -54,7 +54,7 @@ import edit_window
 import subprocess
 from pathlib import Path
 
-import collections
+import re
 
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
@@ -161,7 +161,14 @@ def fix_config():
                     if len(splitted) == 2:
                         fixed_conf.append(line)
     write_config(''.join(fixed_conf))
-                
+
+def resub_config():
+    """Delete multiple tabs and spaces"""
+    conf = ''.join(read_config())
+    conf = re.sub('(\t)+', ' ', conf)
+    conf = re.sub('\t', ' ', conf)
+    conf = re.sub('( )+', ' ', conf)
+    write_config(conf)
 
 
 def find_key_combo(qt_key_combo):
@@ -189,6 +196,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         """init
         
         Calls for self.display_config() and adds triggers to all the events.
+        Resubs config (multiple tabs and spaces)
         Tries to launch libinput-gestures-setup:
             if it works, sets self.installed to True
             if not sets self.installed to False
@@ -196,7 +204,8 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
-
+        
+        resub_config()
         self.display_config()
 
         self.actionAdd.triggered.connect(self.start_adding)
@@ -210,7 +219,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.pushButton.clicked.connect(self.start_adding)
 
         try:
-            subprocess.run(['libinput-gestures-setup', 'status'])
+            subprocess.run(['libinput-gestures-setup', 'status'], capture_output=True)
             self.installed = True
         except FileNotFoundError:
             QtWidgets.QMessageBox.about(self, "Problem", "Cannot find libinput-gestures. Are you sure it is installed correctly?")
@@ -280,8 +289,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 e.g. ['ctrl+super+Page_Down']
                 e.g. ['echo "Hello"']
             self.buttons: list of str
-                finger action in config-readable form
-                e.g. ['gesture swipe up']
+                e.g. ['gesture swipe up 3']
             self.actions: list of str
                 either 'shortcut' (stands for a keyboard shortcut)
                 or 'command'
@@ -319,8 +327,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 e.g. ['ctrl+super+Page_Down']                     
                 e.g. ['echo "Hello"']                                                    V------------------------------------V
             self.buttons: list of str                    <============ Exact values of  'gesture <type:swipe|pinch> <direction> ...'
-                finger action in config-readable form
-                e.g. ['gesture swipe up']
+                e.g. ['gesture swipe up 3']
             self.actions: list of str                    <============ Depend on whether xdotool is used in config line
                 either 'shortcut' (stands for a keyboard shortcut)
                 or 'command'
@@ -333,8 +340,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.actions = []
         for line in conf:
             if line.startswith('gesture'):
-                splitted = line.replace('\t', ' ').split()
-                action = '{} {} {}'.format(splitted[0], splitted[1], splitted[2])
+                splitted = line.split()
                 self.gestures.append(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])])
                 self.fingers.append(splitted[3])
                 if splitted[4] == 'xdotool' and splitted[5] == 'key':
@@ -343,7 +349,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 else:
                     self.actions.append('command')
                     self.shortcuts.append(' '.join(splitted[4:]))
-                self.buttons.append(action)
+                self.buttons.append('{} {} {} {}'.format(splitted[0], splitted[1], splitted[2], splitted[3]))
 
     def display_config(self, refresh=False):
         """Displays current configuration in main window
@@ -412,7 +418,10 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             )
             if reply == QtWidgets.QMessageBox.Yes:
                 conf = read_config()
-                new_conf = [line for line in conf if not line.startswith(button.accessibleName())]
+                new_conf = []
+                for line in conf:
+                    if not line.startswith(button.accessibleName()):
+                        new_conf.append(line)
                 write_config(new_conf)
                 self.display_config(refresh=True)
         
