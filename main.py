@@ -40,9 +40,12 @@ reversed_mapping = {
 }
 
 def read_config():
-    with open(CONFIG_LOCATION, 'r') as config:
-        conf = config.readlines()
-    return conf
+    try:
+        with open(CONFIG_LOCATION, 'r') as config:
+            conf = config.readlines()
+        return conf
+    except FileNotFoundError:
+        return ''
 
 
 def write_config(new_conf):
