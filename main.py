@@ -326,7 +326,8 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.fingers = value
 
     def shortcut_chosen(self, text):
-        self.shortcut = 'xdotool key ' + find_key_combo(text.toString())
+        shortcut = text.toString().split(',')[0]
+        self.shortcut = 'xdotool key ' + find_key_combo(shortcut)
 
     def command_chosen(self, text):
         self.shortcut = text
