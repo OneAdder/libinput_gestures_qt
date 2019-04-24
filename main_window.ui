@@ -85,6 +85,7 @@
     </property>
     <addaction name="actionAdd"/>
     <addaction name="actionRefresh"/>
+    <addaction name="actionSet_to_default_KDE"/>
    </widget>
    <widget class="QMenu" name="menuService">
     <property name="title">
@@ -95,8 +96,16 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>&amp;About</string>
+    </property>
+    <addaction name="actionDefaults_KDE_Plasma"/>
+    <addaction name="actionLicense"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuService"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAdd">
@@ -127,6 +136,21 @@
   <action name="actionRefresh">
    <property name="text">
     <string>&amp;Refresh</string>
+   </property>
+  </action>
+  <action name="actionSet_to_default_KDE">
+   <property name="text">
+    <string>Set to default (KDE)</string>
+   </property>
+  </action>
+  <action name="actionDefaults_KDE_Plasma">
+   <property name="text">
+    <string>Defaults (KDE Plasma)</string>
+   </property>
+  </action>
+  <action name="actionLicense">
+   <property name="text">
+    <string>License</string>
    </property>
   </action>
  </widget>
