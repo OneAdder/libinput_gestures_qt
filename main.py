@@ -23,6 +23,8 @@ import edit_window
 import subprocess
 from pathlib import Path
 
+import collections
+
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
 
@@ -196,6 +198,28 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             status = subprocess.run(['libinput-gestures-setup', 'start'], capture_output=True)
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
+
+    def sort_config(self):
+        for_sorting = []
+        for i, el in enumerate(self.gestures):
+            for_sorting.append([el, (self.fingers[i], self.shortcuts[i], self.buttons[i], self.actions[i])])
+        sorted_conf = sorted(for_sorting)
+        #print(sorted_conf)
+        '''
+        od = collections.OrderedDict(sorted(d.items()))
+        self.gestures = []
+        self.fingers = []
+        self.shortcuts = []
+        self.buttons = []
+        self.actions = []
+        for gesture in od:
+            value = od[gesture]
+            self.gestures.append(gesture)
+            self.fingers.append(value[0])
+            self.shortcuts.append(value[1])
+            self.buttons.append(value[2])
+            self.actions.append(value[3])
+            '''
     
     def prepare_config_for_displaying(self):
         conf = read_config()
@@ -208,14 +232,14 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             if line.startswith('gesture'):
                 splitted = line.replace('\t', ' ').split()
                 action = '{} {} {}'.format(splitted[0], splitted[1], splitted[2])
-                self.gestures.append(QtWidgets.QLabel(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])]))
-                self.fingers.append(QtWidgets.QLabel(splitted[3]))
+                self.gestures.append(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])])
+                self.fingers.append(splitted[3])
                 if splitted[4] == 'xdotool' and splitted[5] == 'key':
-                    self.actions.append(QtWidgets.QLabel('shortcut'))
-                    self.shortcuts.append(QtWidgets.QLabel(splitted[6]))
+                    self.actions.append('shortcut')
+                    self.shortcuts.append(splitted[6])
                 else:
-                    self.actions.append(QtWidgets.QLabel('command'))
-                    self.shortcuts.append(QtWidgets.QLabel(' '.join(splitted[4:])))
+                    self.actions.append('command')
+                    self.shortcuts.append(' '.join(splitted[4:]))
                 self.buttons.append(action)
 
     def display_config(self, refresh=False):
@@ -236,6 +260,8 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 self.prepare_config_for_displaying()
             else:
                 sys.exit()
+
+        self.sort_config()
         
         self.layout = self.verticalLayout
         self.area = QtWidgets.QScrollArea()
@@ -245,16 +271,16 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.area.setWidgetResizable(True)
 
         for i, label in enumerate(self.gestures):
-            flay.addWidget(label, i, 0)
+            flay.addWidget(QtWidgets.QLabel(label), i, 0)
 
         for i, label in enumerate(self.fingers):
-            flay.addWidget(label, i, 1)
+            flay.addWidget(QtWidgets.QLabel(label), i, 1)
 
         for i, label in enumerate(self.actions):
-            flay.addWidget(label, i, 2)
+            flay.addWidget(QtWidgets.QLabel(label), i, 2)
 
         for i, label in enumerate(self.shortcuts):
-            flay.addWidget(label, i, 3)
+            flay.addWidget(QtWidgets.QLabel(label), i, 3)
 
         for i, button in enumerate(self.buttons):
             deleteButton = QtWidgets.QPushButton("Delete")
@@ -342,7 +368,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
             conf = read_config()
             new_conf = []
             for line in conf:
-                if not line.startswith(self.action):
+                if not line.replace('\t', ' ').startswith('{} {}'.format(self.action, str(self.fingers))):
                     new_conf.append(line)
             new_conf.append('{}\t{} {}\n'.format(self.action, str(self.fingers), self.shortcut))
             write_config(new_conf)
