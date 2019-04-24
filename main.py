@@ -288,11 +288,11 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.setupUi(self)
         self.setWindowTitle('Add Gestures')
 
-        self.action = ''
-        self.fingers = 0
+        self.action = 'gesture swipe up'
+        self.fingers = 3
         self.shortcut = ''
         
-        self.fingersLine.setMinimum(2)
+        self.fingersLine.setMinimum(3)
 
         self.draw_shortcut()
         self.shortcut_command.activated[str].connect(self.shortcut_or_command)
@@ -320,6 +320,12 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.commandLine.textChanged[str].connect(self.command_chosen)
 
     def action_chosen(self, text):
+        if 'Pinch' in text:
+            self.fingersLine.setMinimum(2)
+            self.fingersLine.setValue(2)
+        else:
+            self.fingersLine.setMinimum(3)
+            self.fingersLine.setValue(3)
         self.action = actions_mapping[text]
 
     def fingers_chosen(self, value):
