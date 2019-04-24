@@ -620,9 +620,9 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
             conf = read_config()
             new_conf = []
             for line in conf:
-                if not line.replace('\t', ' ').startswith('{} {}'.format(self.action, str(self.fingers))):
+                if not line.startswith('{} {}'.format(self.action, str(self.fingers))):
                     new_conf.append(line)
-            new_conf.append('{}\t{} {}\n'.format(self.action, str(self.fingers), self.shortcut))
+            new_conf.append('{} {} {}\n'.format(self.action, str(self.fingers), self.shortcut))
             write_config(new_conf)
             self.actionMenu.setCurrentIndex(0)
             self.fingersLine.setValue(0)
