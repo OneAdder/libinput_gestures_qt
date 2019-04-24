@@ -93,6 +93,7 @@ def fix_config():
                 else:
                     if len(splitted) == 2:
                         fixed_conf.append(line)
+    write_config(''.join(fixed_conf))
                 
 
 
@@ -216,6 +217,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             )
             if reply == QtWidgets.QMessageBox.Yes:
                 fix_config()
+                self.prepare_config_for_displaying()
             else:
                 sys.exit()
         
