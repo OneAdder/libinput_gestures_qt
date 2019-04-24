@@ -46,7 +46,7 @@ reversed_mapping = {
     'gesture swipe down': 'Swipe Down',
     'gesture swipe left': 'Swipe Left',
     'gesture swipe left_up': 'Swipe LeftUp',
-    'gesture swipe  left_down': 'Swipe LeftDown',
+    'gesture swipe left_down': 'Swipe LeftDown',
     'gesture swipe right': 'Swipe Right',
     'gesture swipe right_up': 'Swipe RightUp',
     'gesture swipe right_down': 'Swipe RightDown',
@@ -138,9 +138,6 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
         self.display_config()
 
-        self.adding = EditGestures()
-        self.adding.setWindowModality(QtCore.Qt.WindowModal)
-
         self.actionAdd.triggered.connect(self.start_adding)
         self.actionRefresh.triggered.connect(self.refresh)
         
@@ -159,6 +156,8 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             self.installed = False
 
     def start_adding(self):
+        self.adding = EditGestures(self)
+        self.adding.setWindowModality(QtCore.Qt.WindowModal)
         self.adding.show()
 
     def refresh(self):
@@ -279,13 +278,13 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 new_conf = [line for line in conf if not line.startswith(button.accessibleName())]
                 write_config(new_conf)
                 self.display_config(refresh=True)
-
         
         
 class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
         self.setupUi(self)
+        self.parent = parent
         self.setWindowTitle('Add Gestures')
 
         self.action = 'gesture swipe up'
@@ -351,6 +350,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
             self.fingersLine.setValue(0)
             #self.keyboardLine.setText('')
             QtWidgets.QMessageBox.about(self, "Success", "Cofiguration successfully edited.")
+            self.parent.display_config(refresh=True)
             self.close()
         else:
             QtWidgets.QMessageBox.about(self, "Fail", "Please, fill all the forms.")
