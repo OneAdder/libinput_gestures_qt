@@ -47,6 +47,7 @@ class Ui_Form(object):
         self.shortcut_command.setObjectName("shortcut_command")
         self.shortcut_command.addItem("")
         self.shortcut_command.addItem("")
+        self.shortcut_command.addItem("")
         self.gridLayout.addWidget(self.shortcut_command, 3, 2, 1, 1)
         self.label = QtWidgets.QLabel(Form)
         self.label.setObjectName("label")
@@ -78,7 +79,8 @@ class Ui_Form(object):
         self.actionMenu.setItemText(11, _translate("Form", "Pinch Anticlockwise"))
         self.saveButton.setText(_translate("Form", "Save changes"))
         self.shortcut_command.setItemText(0, _translate("Form", "Keyboard Shortcut"))
-        self.shortcut_command.setItemText(1, _translate("Form", "Command"))
+        self.shortcut_command.setItemText(1, _translate("Form", "Plasma action"))
+        self.shortcut_command.setItemText(2, _translate("Form", "Command"))
         self.label.setText(_translate("Form", "Action"))
         self.actionType.setText(_translate("Form", "Keyboard Shortcut"))
 

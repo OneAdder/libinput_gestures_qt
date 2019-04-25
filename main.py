@@ -253,13 +253,12 @@ def get_qdbus_name():
         subprocess.run('qdbus', capture_output=True)
         return 'qdbus'
     except FileNotFoundError:
-        try:
-            subprocess.run('qdbus-qt5', capture_output=True)
-            return 'qdbus-qt5'
-        except FileNotFoundError:
-            pass
+        subprocess.run('qdbus-qt5', capture_output=True)
+        return 'qdbus-qt5'
 
-kde_defaults = kde_defaults.format(qdbus=get_qdbus_name())
+
+QDBUS_NAME = get_qdbus_name()
+kde_defaults = kde_defaults.format(qdbus=QDBUS_NAME)
 
 
 class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
@@ -336,6 +335,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             self.display_config(refresh=True)
 
     def import_config(self):
+        """Import some config file"""
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Import', HOME)
         #Without this try-except the app krashes when I close the Import window
         try:
@@ -594,20 +594,23 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.fingersLine.setMinimum(3)
 
         self.draw_shortcut()
-        self.shortcut_command.activated[str].connect(self.shortcut_or_command)
+        self.shortcut_command.activated[str].connect(self.shortcut_command_or_qdbus)
         
         self.actionMenu.activated[str].connect(self.action_chosen)
         self.fingersLine.valueChanged[int].connect(self.fingers_chosen)
+        
         self.saveButton.clicked.connect(self.save_changes)
 
-    def shortcut_or_command(self, text):
-        """Chose whether you want to add plain command or xdotool command using QKeySequenceEdit
+    def shortcut_command_or_qdbus(self, text):
+        """Chose whether you want to add plain command, xdotool command using QKeySequenceEdit or qdbus command
         
         Does not delete previous widgets: they are stored one upon another.
         HELP NEEDED -- it works but it's stupid :(
         """
         if text == 'Keyboard Shortcut':
             self.draw_shortcut()
+        elif text == 'Plasma action':
+            self.draw_plasma_actions()
         else:
             self.draw_command()
 
@@ -617,16 +620,44 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         ... so that user could just press buttons (sh|h)e wants
         istead of manually typing 'xdotool key <key combo>' and remember differences between xdotool/Gnome/KDE/etc.
         """
+        self.shortcut = ''
         self.actionType.setText('Keyboard Shortcut')
         self.keyboardLine = QtWidgets.QKeySequenceEdit()
         self.gridLayout.addWidget(self.keyboardLine, 4, 2)
         self.keyboardLine.keySequenceChanged.connect(self.shortcut_chosen)
+
+    def draw_plasma_actions(self):
+        """Draws Plasma actions combobox input
+        
+        ... so that user could just choose action for Plasma
+        """
+        self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
+        
+        self.actionType.setText('Plasma action')
+        self.plasmaActions = QtWidgets.QComboBox()
+        self.plasmaActions.addItem("Next Desktop")
+        self.plasmaActions.addItem("Previous Desktop")
+        kwin_shortcuts = subprocess.run(
+            [
+                QDBUS_NAME, 'org.kde.kglobalaccel', '/component/kwin',
+                'org.kde.kglobalaccel.Component.shortcutNames'
+            ],
+            capture_output=True,
+        )
+        kwin_shortcuts = kwin_shortcuts.stdout.decode('utf-8').split('\n')[:-2]
+        kwin_shortcuts.sort()
+        for kwin_shortcut in kwin_shortcuts:
+            self.plasmaActions.addItem(kwin_shortcut)
+        self.gridLayout.addWidget(self.plasmaActions, 4, 2)
+        
+        self.plasmaActions.activated[str].connect(self.plasma_action_chosen)
         
     def draw_command(self):
         """Draws command input
         
-        ... because I don't want users to be stuck with xdotool
+        ... because I don't want users to be stuck with xdotool and qdbus
         """
+        self.shortcut = ''
         self.actionType.setText('Command')
         self.commandLine = QtWidgets.QLineEdit()
         self.gridLayout.addWidget(self.commandLine, 4, 2)
@@ -654,6 +685,15 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
     def command_chosen(self, text):
         """Event when command is typed in"""
         self.shortcut = text
+
+    def plasma_action_chosen(self, text):
+        self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
+        if text == 'Next Desktop':
+            self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
+        elif text == 'Previous Desktop':
+            self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin previousDesktop'
+        else:
+            self.shortcut = '{qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "{sh}"'.format(qdbus=QDBUS_NAME, sh=text)
 
     def save_changes(self):
         """Writes input data into config file"""

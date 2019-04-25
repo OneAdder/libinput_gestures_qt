@@ -113,6 +113,11 @@
        </item>
        <item>
         <property name="text">
+         <string>Plasma action</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Command</string>
         </property>
        </item>
