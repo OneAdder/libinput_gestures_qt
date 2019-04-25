@@ -337,12 +337,16 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
     def import_config(self):
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Import', HOME)
-        with open(fname[0]) as f:
-            imported_config = f.readlines()
-        write_config(imported_config)
-        resub_config()
-        fix_config()
-        self.display_config(refresh=True)
+        #Without this try-except the app krashes when I close the Import window
+        try:
+            with open(fname[0]) as f:
+                imported_config = f.readlines()
+            write_config(imported_config)
+            resub_config()
+            fix_config()
+            self.display_config(refresh=True)
+        except FileNotFoundError:
+            pass
         
 
     '''
