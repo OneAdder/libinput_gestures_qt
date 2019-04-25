@@ -148,6 +148,8 @@ Present windows: Swipe Down (3 fingers)
 Desktop Grid: Swipe Up (3 fingers)
 Maximize: Swipe Up (4 fingers)
 Minimize: Swipe Down (4 fingers)
+Next virtual desktop: Swipe Left (4 fingers)
+Previous virtual desktop: Swipe Right (4 fingers)
 Browser 'Back': Swipe Right (3 fingers)
 Browser 'Forward': Swipe Left (3 fingers)
 '''
@@ -326,7 +328,9 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         """Set default settings for KDE Plasma"""
         reply = QtWidgets.QMessageBox.question(
             self, 'Message',
-            "Set to defaults? Configuration file will be backed up.",
+            'Set to defaults?\n'
+            'Configuration file will be backed up.\n'
+            'You will be able to import it from ~/.cofig/libinput-gestures.conf.old',
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.No
         )
