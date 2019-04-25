@@ -138,9 +138,9 @@ gesture swipe down 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut
 gesture swipe up 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Window Maximize"
 #
 #Next virtual desktop
-gesture swipe right 4 {qdbus} org.kde.KWin /KWin nextDesktop
+gesture swipe left 4 {qdbus} org.kde.KWin /KWin nextDesktop
 #Previous virtual desktop
-gesture swipe left 4 {qdbus} org.kde.KWin /KWin previousDesktop
+gesture swipe right 4 {qdbus} org.kde.KWin /KWin previousDesktop
 '''
 
 kde_defaults_description = '''
