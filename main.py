@@ -49,7 +49,7 @@ GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow)
 EditGestures(QtWidgets.QWidget, edit_window.Ui_Form)
     Secondary window for adding/editing gestures.
 --------------
-Functions: read_config, write_config, find_key_combo, main
+Functions: read_config, write_config, find_key_combo, getqdbus_name, main
 --------------
 """
 
@@ -126,16 +126,21 @@ gesture swipe left 3 xdotool key alt+Right
 gesture swipe right 3 xdotool key alt+Left
 #
 #Present Windows
-gesture swipe down 3 xdotool key ctrl+F9
+gesture swipe down 3 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Expose"
 #
 #Desktop Grid
-gesture swipe up 3 xdotool key ctrl+F8
+gesture swipe up 3  {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut ShowDesktopGrid
 #
 #Minimize
-gesture swipe down 4 xdotool key super+Page_Down
+gesture swipe down 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Window Minimize"
 #
 #Maximize
-gesture swipe up 4 xdotool key super+Page_Up
+gesture swipe up 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Window Maximize"
+#
+#Next virtual desktop
+gesture swipe right 4 {qdbus} org.kde.KWin /KWin nextDesktop
+#Previous virtual desktop
+gesture swipe left 4 {qdbus} org.kde.KWin /KWin previousDesktop
 '''
 
 kde_defaults_description = '''
@@ -241,6 +246,20 @@ def find_key_combo(qt_key_combo):
         else:
             xdotool_key_combo.append(lowered_key)
     return '+'.join(xdotool_key_combo)
+
+def get_qdbus_name():
+    """It's either 'qdbus' or 'qdbus-qt5'"""
+    try:
+        subprocess.run('qdbus', capture_output=True)
+        return 'qdbus'
+    except FileNotFoundError:
+        try:
+            subprocess.run('qdbus-qt5', capture_output=True)
+            return 'qdbus-qt5'
+        except FileNotFoundError:
+            pass
+
+kde_defaults = kde_defaults.format(qdbus=get_qdbus_name())
 
 
 class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
