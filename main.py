@@ -261,10 +261,6 @@ def get_qdbus_name():
         return 'qdbus-qt5'
 
 
-QDBUS_NAME = get_qdbus_name()
-kde_defaults = kde_defaults.format(qdbus=QDBUS_NAME)
-
-
 class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     """Main window.
     
@@ -282,6 +278,20 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
+        self.QDBUS_NAME = get_qdbus_name()
+        if not self.QDBUS_NAME:
+            reply = QtWidgets.QMessageBox.question(self, "Cannot find qdbus",
+                                                   'Unable to find qdbus binary.\n'
+                                                   'It is a utility included into KDE Plasma used by this app.\n'
+                                                   'If you have qdbus but it is called somewhat else, alias it to "qdbus" and restart the app.\n'
+                                                   'If not, you will not be able to use KDE defaults and map Plasma actions.'
+                                                   'Continue?',
+                                                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                   QtWidgets.QMessageBox.No)
+            if reply == QtWidgets.QMessageBox.No:
+                sys.exit()
+
+        self.kde_defaults = kde_defaults.format(qdbus=self.QDBUS_NAME)
         
         resub_config()
         self.display_config()
@@ -337,8 +347,11 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             QtWidgets.QMessageBox.No
         )
         if reply == QtWidgets.QMessageBox.Yes:
-            write_defaults(kde_defaults)
-            self.display_config(refresh=True)
+            if self.QDBUS_NAME:
+                write_defaults(self.kde_defaults)
+                self.display_config(refresh=True)
+            else:
+                QtWidgets.QMessageBox.about(self, 'No qdbus', 'You cannot do it without qdbus:(')
 
     def import_config(self):
         """Import some config file"""
@@ -590,12 +603,14 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         """init
         
         Sets widgets and their attributes that I could not set in QT Designer.
-        Adds events to buttons.
+        Adds events to buttons. Checks for qdbus.
         """
         super().__init__()
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle('Add Gestures')
+        
+        self.QDBUS_NAME = get_qdbus_name()
 
         self.action = 'gesture swipe up'
         self.fingers = 3
@@ -620,7 +635,8 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         if text == 'Keyboard Shortcut':
             self.draw_shortcut()
         elif text == 'Plasma action':
-            self.draw_plasma_actions()
+            if self.QDBUS_NAME:
+                self.draw_plasma_actions()
         else:
             self.draw_command()
 
@@ -641,13 +657,13 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         
         ... so that user could just choose action for Plasma
         """
-        self.shortcut = QDBUS_NAME + ' org.kde.kglobalaccel /component/kwin invokeShortcut "Expose"'
+        self.shortcut = self.QDBUS_NAME + ' org.kde.kglobalaccel /component/kwin invokeShortcut "Expose"'
         
         self.actionType.setText('Plasma action')
         self.plasmaActions = QtWidgets.QComboBox()
         kwin_shortcuts = subprocess.run(
             [
-                QDBUS_NAME, 'org.kde.kglobalaccel', '/component/kwin',
+                self.QDBUS_NAME, 'org.kde.kglobalaccel', '/component/kwin',
                 'org.kde.kglobalaccel.Component.shortcutNames'
             ],
             capture_output=True,
@@ -695,7 +711,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.shortcut = text
 
     def plasma_action_chosen(self, text):
-        self.shortcut = '{qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "{sh}"'.format(qdbus=QDBUS_NAME, sh=text)
+        self.shortcut = '{qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "{sh}"'.format(qdbus=self.QDBUS_NAME, sh=text)
 
     def save_changes(self):
         """Writes input data into config file"""
