@@ -129,7 +129,7 @@ gesture swipe right 3 xdotool key alt+Left
 gesture swipe down 3 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Expose"
 #
 #Desktop Grid
-gesture swipe up 3  {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut ShowDesktopGrid
+gesture swipe up 3  {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "ShowDesktopGrid"
 #
 #Minimize
 gesture swipe down 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Window Minimize"
@@ -138,9 +138,9 @@ gesture swipe down 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut
 gesture swipe up 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Window Maximize"
 #
 #Next virtual desktop
-gesture swipe left 4 {qdbus} org.kde.KWin /KWin nextDesktop
+gesture swipe left 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Switch to Next Desktop"
 #Previous virtual desktop
-gesture swipe right 4 {qdbus} org.kde.KWin /KWin previousDesktop
+gesture swipe right 4 {qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "Switch to Previous Desktop"
 '''
 
 kde_defaults_description = '''
@@ -208,20 +208,22 @@ def fix_config():
     conf = read_config()
     fixed_conf = []
     for line in conf:
-        if line and line != '\n':
-            if line.startswith('#'):
-                fixed_conf.append(line)
-            else:
-                splitted = line.replace('\t', ' ').split()
-                if splitted[0] in ['gesture', 'device', 'swipe_threshold']:
-                    if splitted[0] == 'gesture':
-                        if splitted[4] == 'xdotool':
-                            if splitted[5] == 'key' and len(splitted) == 7:
-                                fixed_conf.append(line)
-                        else:
+        if line.startswith('#') or line == '\n':
+            fixed_conf.append(line)
+        else:
+            splitted = line.replace('\t', ' ').split()
+            if splitted[0] in ['gesture', 'device', 'swipe_threshold']:
+                if splitted[0] == 'gesture':
+                    if splitted[4] == 'xdotool':
+                        if splitted[5] == 'key' and len(splitted) == 7:
+                            fixed_conf.append(line)
+                    elif 'qdbus' in splitted[4]:
+                        if splitted[-1].endswith('"'):
                             fixed_conf.append(line)
                     else:
-                        if len(splitted) == 2:
+                        fixed_conf.append(line)
+                else:
+                    if len(splitted) == 2:
                             fixed_conf.append(line)
     write_config(''.join(fixed_conf))
 
@@ -489,7 +491,11 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                     self.shortcuts.append(splitted[6])
                 elif 'qdbus' in splitted[4]:
                     self.actions.append('Plasma action')
-                    self.shortcuts.append(splitted[-1].replace('"', ''))
+                    plasma_action = re.findall('"(.*?)"', line)[0]
+                    if plasma_action:
+                        self.shortcuts.append(plasma_action)
+                    else:
+                        self.shortcuts.append(splitted[-1].replace('"', ''))
                 else:
                     self.actions.append('Command')
                     self.shortcuts.append(' '.join(splitted[4:]))
@@ -635,12 +641,10 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         
         ... so that user could just choose action for Plasma
         """
-        self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
+        self.shortcut = QDBUS_NAME + ' org.kde.kglobalaccel /component/kwin invokeShortcut "Expose"'
         
         self.actionType.setText('Plasma action')
         self.plasmaActions = QtWidgets.QComboBox()
-        self.plasmaActions.addItem("Next Desktop")
-        self.plasmaActions.addItem("Previous Desktop")
         kwin_shortcuts = subprocess.run(
             [
                 QDBUS_NAME, 'org.kde.kglobalaccel', '/component/kwin',
@@ -691,13 +695,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.shortcut = text
 
     def plasma_action_chosen(self, text):
-        self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
-        if text == 'Next Desktop':
-            self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin nextDesktop'
-        elif text == 'Previous Desktop':
-            self.shortcut = QDBUS_NAME + ' org.kde.KWin /KWin previousDesktop'
-        else:
-            self.shortcut = '{qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "{sh}"'.format(qdbus=QDBUS_NAME, sh=text)
+        self.shortcut = '{qdbus} org.kde.kglobalaccel /component/kwin invokeShortcut "{sh}"'.format(qdbus=QDBUS_NAME, sh=text)
 
     def save_changes(self):
         """Writes input data into config file"""
@@ -711,7 +709,6 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
             write_config(new_conf)
             self.actionMenu.setCurrentIndex(0)
             self.fingersLine.setValue(0)
-            #self.keyboardLine.setText('')
             QtWidgets.QMessageBox.about(self, "Success", "Cofiguration successfully edited.")
             self.parent.display_config(refresh=True)
             self.close()
