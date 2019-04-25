@@ -454,13 +454,16 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             self.shortcuts: list of str                  <======------ Exact values of  '... <fingers> <command>'
                 keyboard shortcuts (in the xdotool form)        \ <<or>>                                           V-----------------V
                 OR commands                                      ----- Exact values of  '... <fingers> xdotool key <keyboard_shortcut>
-                e.g. ['ctrl+super+Page_Down']                     
-                e.g. ['echo "Hello"']                                                    V------------------------------------V
+                e.g. ['ctrl+super+Page_Down']                     \ <<or>>                                                      V--------V
+                e.g. ['echo "Hello"']                              --- Exact values of  '... <fingers> <qdbus trigger shortcut> <shortcut>' 
+                
+                                                                                         V------------------------------------V
             self.buttons: list of str                    <============ Exact values of  'gesture <type:swipe|pinch> <direction> ...'
                 e.g. ['gesture swipe up 3']
-            self.actions: list of str                    <============ Depend on whether xdotool is used in config line
-                either 'shortcut' (stands for a keyboard shortcut)
-                or 'command'
+            self.actions: list of str                    <============ Depend on whether xdotool or qdbus is used in config line
+                either 'Keyboard shortcut'
+                or 'Plasma action'
+                or 'Command'
         """
         conf = read_config()
         self.gestures = []
@@ -474,10 +477,13 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 self.gestures.append(reversed_mapping['{} {} {}'.format(splitted[0], splitted[1], splitted[2])])
                 self.fingers.append(splitted[3])
                 if splitted[4] == 'xdotool' and splitted[5] == 'key':
-                    self.actions.append('shortcut')
+                    self.actions.append('Keyboard shortcut')
                     self.shortcuts.append(splitted[6])
+                elif 'qdbus' in splitted[4]:
+                    self.actions.append('Plasma action')
+                    self.shortcuts.append(splitted[-1].replace('"', ''))
                 else:
-                    self.actions.append('command')
+                    self.actions.append('Command')
                     self.shortcuts.append(' '.join(splitted[4:]))
                 self.buttons.append('{} {} {} {}'.format(splitted[0], splitted[1], splitted[2], splitted[3]))
 
