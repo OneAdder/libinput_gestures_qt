@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 '''libinput-gestures-qt. User interface for the libinput-gestures utility. 
     Copyright (C) 2019  Michael Voronov
 
@@ -56,8 +55,8 @@ Functions: read_config, write_config, find_key_combo, getqdbus_name, main
 
 import sys
 from PyQt5 import QtWidgets, QtCore
-import main_window
-import edit_window
+from libinput_gestures_qt import main_window
+from libinput_gestures_qt import edit_window
 
 import subprocess
 from pathlib import Path
