@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 '''libinput-gestures-qt. User interface for the libinput-gestures utility. 
     Copyright (C) 2019  Michael Voronov
 
