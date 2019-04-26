@@ -26,6 +26,8 @@ HOME: str
     path to user's home directory
 CONFIG_LOCATION: str
     path to the location of the configuration file
+LOGO_LOCATION: str
+    path to logo
 Mappings:
 --------
 actions_mapping: dict
@@ -54,17 +56,19 @@ Functions: read_config, write_config, find_key_combo, getqdbus_name, main
 """
 
 import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from libinput_gestures_qt import main_window
 from libinput_gestures_qt import edit_window
 
 import subprocess
 from pathlib import Path
+import os
 
 import re
 
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
+LOGO_LOCATION = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + 'logo' + os.path.sep + 'logo.png'
 
 actions_mapping = {
     'Swipe Up': 'gesture swipe up',
@@ -278,6 +282,8 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
+        self.setWindowTitle('Add Gestures')
+        self.setWindowIcon(QtGui.QIcon(LOGO_LOCATION))
         self.QDBUS_NAME = get_qdbus_name()
         if not self.QDBUS_NAME:
             reply = QtWidgets.QMessageBox.question(self, "Cannot find qdbus",
@@ -609,6 +615,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle('Add Gestures')
+        self.setWindowIcon(QtGui.QIcon(LOGO_LOCATION))
         
         self.QDBUS_NAME = get_qdbus_name()
 

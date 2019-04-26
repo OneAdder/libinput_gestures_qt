@@ -11,4 +11,5 @@ setup(name='libinput_gestures_qt',
       #actually, you also need pyqt5 and pathlib. But use your package manager, not pip!
       #pip died after installing one of those!
       zip_safe=False,
-      scripts=['libinput-gestures-qt']) 
+      scripts=['libinput-gestures-qt'],
+      include_package_data=True) 
