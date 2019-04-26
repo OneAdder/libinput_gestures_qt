@@ -258,10 +258,10 @@ def find_key_combo(qt_key_combo):
 def get_qdbus_name():
     """It's either 'qdbus' or 'qdbus-qt5'"""
     try:
-        subprocess.run('qdbus', capture_output=True)
+        subprocess.run(['qdbus'], capture_output=True)
         return 'qdbus'
     except FileNotFoundError:
-        subprocess.run('qdbus-qt5', capture_output=True)
+        subprocess.run(['qdbus-qt5'], capture_output=True)
         return 'qdbus-qt5'
 
 
@@ -282,7 +282,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
-        self.setWindowTitle('Libinput Gestures Settings')
+
         self.setWindowIcon(QtGui.QIcon(LOGO_LOCATION))
         self.QDBUS_NAME = get_qdbus_name()
         if not self.QDBUS_NAME:
@@ -387,7 +387,6 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def run_libinput_gestures(self):
         """Start libinput-gestures in background"""
         if self.installed:
-            #subprocess.run(['pkill', '-f', 'python3', '/usr/bin/libinput-gestures'], capture_output=True)
             subprocess.Popen(['libinput-gestures'])
             self.display_status()
     
