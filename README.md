@@ -31,7 +31,7 @@ already use it myself.
 
 ### Features
 1) Handsome main window with current configuration displayed in human-readable form:
-![image](https://user-images.githubusercontent.com/19834976/56820726-58a18500-6855-11e9-9cca-caf9391957a4.png)
+![image](https://user-images.githubusercontent.com/19834976/56821309-9521b080-6856-11e9-8a2c-ee12b31c9fa4.png)
 2) Adding new gestures.  
 It's possible to map a gesture to a command, keyboard shortcut or kwin shortcut (via `qdbus`):
 ![image](https://user-images.githubusercontent.com/19834976/56820851-9c948a00-6855-11e9-9768-9985e0e1f868.png)
