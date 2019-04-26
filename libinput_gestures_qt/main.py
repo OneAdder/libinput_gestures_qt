@@ -394,7 +394,14 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def kill_libinput_gestures(self):
         """Fing libinput-gestures and kill it"""
         if self.installed:
-            subprocess.run(['pkill', '-f', 'python3 /usr/bin/libinput-gestures'], capture_output=True)
+            p = subprocess.run(['ps', 'axu'], capture_output=True)
+            s = p.stdout.decode('utf-8').split('\n')
+            for proc in s:
+                if 'python3' in proc and 'libinput-gestures' in proc and 'libinput-gestures-qt' not in proc:
+                    try:
+                        subprocess.run(['kill', proc.split()[1]], capture_output=True)
+                    except Exception:
+                        pass
             self.display_status()
     
     def set_to_autostart(self):

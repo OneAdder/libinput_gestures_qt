@@ -1,5 +1,3 @@
-import sys
-sys.prefix = '/usr/local'
 from setuptools import setup
 
 setup(name='libinput_gestures_qt',
@@ -16,6 +14,8 @@ setup(name='libinput_gestures_qt',
       scripts=['libinput-gestures-qt'],
       data_files=[
         ('share/applications', ['libinput_gestures_qt/logo/libinput-gestures-qt.desktop']),
-        ('share/pixmaps/', ['libinput_gestures_qt/logo/libinput-gestures-qt.png'])
+        ('share/pixmaps/', ['libinput_gestures_qt/logo/libinput-gestures-qt.png']),
+        ('local/share/applications', ['libinput_gestures_qt/logo/libinput-gestures-qt.desktop']),
+        ('local/share/pixmaps/', ['libinput_gestures_qt/logo/libinput-gestures-qt.png']),
       ],
       include_package_data=True) 
