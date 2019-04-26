@@ -10,6 +10,8 @@ The problem is that libinput-gestures does not provide a graphical interface and
 I find it too difficult and that is why I decided to make a qt-based app for libinput-gestures.
 
 ### Install
+This package requires Python version 3.7. If you have <3.7, you can try installing it from `legacy_python` branch.
+
 You can install this app by following this steps:
 1) Clone this repo:  
 `git clone https://github.com/OneAdder/libinput_gestures_qt`  
