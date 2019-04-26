@@ -282,7 +282,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Libinput Gestures Qt')
-        self.setWindowTitle('Add Gestures')
+        self.setWindowTitle('Libinput Gestures Settings')
         self.setWindowIcon(QtGui.QIcon(LOGO_LOCATION))
         self.QDBUS_NAME = get_qdbus_name()
         if not self.QDBUS_NAME:
