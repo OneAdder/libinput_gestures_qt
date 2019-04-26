@@ -31,12 +31,14 @@ already use it myself.
 
 ### Features
 1) Handsome main window with current configuration displayed in human-readable form:
-![изображение](https://user-images.githubusercontent.com/19834976/56806833-bd4ce780-6835-11e9-9ed9-52c7cafdb1db.png)
+![image](https://user-images.githubusercontent.com/19834976/56820726-58a18500-6855-11e9-9cca-caf9391957a4.png)
 2) Adding new gestures.  
 It's possible to map a gesture to a command, keyboard shortcut or kwin shortcut (via `qdbus`):
-![изображение](https://user-images.githubusercontent.com/19834976/56806961-1caaf780-6836-11e9-81a7-831e433c5e06.png)
-![изображение](https://user-images.githubusercontent.com/19834976/56807027-4f54f000-6836-11e9-97db-a50966e20c8b.png)
-![изображение](https://user-images.githubusercontent.com/19834976/56807127-93e08b80-6836-11e9-88bf-0d8d33e9fc52.png)
-3) Set gestures to my defaults:  
-![изображение](https://user-images.githubusercontent.com/19834976/56807189-c5595700-6836-11e9-98a7-290db8e36a0c.png)
-4) Control libinput-gestures-setup.
+![image](https://user-images.githubusercontent.com/19834976/56820851-9c948a00-6855-11e9-9768-9985e0e1f868.png)
+![image](https://user-images.githubusercontent.com/19834976/56820873-afa75a00-6855-11e9-9119-22e52acacda9.png)
+![image](https://user-images.githubusercontent.com/19834976/56820924-cea5ec00-6855-11e9-976f-980508316027.png)
+3) Set gestures to some defaults:  
+![image](https://user-images.githubusercontent.com/19834976/56820982-ef6e4180-6855-11e9-875d-a573157dada2.png)
+4) Control libinput-gestures-setup.  
+![image](https://user-images.githubusercontent.com/19834976/56821022-04e36b80-6856-11e9-996c-e0db2c26e9f7.png)
+
