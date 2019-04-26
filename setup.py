@@ -1,3 +1,5 @@
+import sys
+sys.prefix = '/usr/local'
 from setuptools import setup
 
 setup(name='libinput_gestures_qt',
