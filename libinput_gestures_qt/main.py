@@ -68,7 +68,7 @@ import re
 
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
-LOGO_LOCATION = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + 'logo' + os.path.sep + 'logo.png'
+LOGO_LOCATION = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + 'logo' + os.path.sep + 'libinput-gestures-qt.png'
 
 actions_mapping = {
     'Swipe Up': 'gesture swipe up',

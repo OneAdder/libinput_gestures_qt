@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=libinput-gestures-qt
+Comment=Setup utility for libinput-gestures
+Exec=libinput-gestures-qt
+Icon=/usr/local/share/pixmaps/libinput-gestures-qt.png
+Terminal=false
+Type=Application
+Categories=Application;System;
+
