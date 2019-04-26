@@ -103,7 +103,16 @@
     <addaction name="actionDefaults_KDE_Plasma"/>
     <addaction name="actionLicense"/>
    </widget>
+   <widget class="QMenu" name="menuUtility">
+    <property name="title">
+     <string>&amp;Utility</string>
+    </property>
+    <addaction name="actionRun"/>
+    <addaction name="actionKill"/>
+    <addaction name="actionSet_to_autostart"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuUtility"/>
    <addaction name="menuService"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -155,7 +164,22 @@
   </action>
   <action name="actionImport_config_file">
    <property name="text">
-    <string>Import config file</string>
+    <string>&amp;Import config file</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionKill">
+   <property name="text">
+    <string>Kill</string>
+   </property>
+  </action>
+  <action name="actionSet_to_autostart">
+   <property name="text">
+    <string>Set to autostart</string>
    </property>
   </action>
  </widget>
