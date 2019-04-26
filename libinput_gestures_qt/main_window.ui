@@ -76,7 +76,7 @@
      <x>0</x>
      <y>0</y>
      <width>791</width>
-     <height>30</height>
+     <height>38</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -110,6 +110,7 @@
     <addaction name="actionRun"/>
     <addaction name="actionKill"/>
     <addaction name="actionSet_to_autostart"/>
+    <addaction name="actionDisable_autostart"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuUtility"/>
@@ -180,6 +181,11 @@
   <action name="actionSet_to_autostart">
    <property name="text">
     <string>Set to autostart</string>
+   </property>
+  </action>
+  <action name="actionDisable_autostart">
+   <property name="text">
+    <string>Disable autostart</string>
    </property>
   </action>
  </widget>

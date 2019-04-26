@@ -310,6 +310,13 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.actionSet_to_default_KDE.triggered.connect(self.set_KDE_default)
         self.actionImport_config_file.triggered.connect(self.import_config)
         
+        #Utility
+        self.libinput_gestures_pid = None
+        self.actionRun.triggered.connect(self.run_libinput_gestures)
+        self.actionKill.triggered.connect(self.kill_libinput_gestures)
+        self.actionSet_to_autostart.triggered.connect(self.set_to_autostart)
+        self.actionDisable_autostart.triggered.connect(self.disable_autostart)
+        
         #Service
         self.actionStatus.triggered.connect(self.display_status)
         self.actionRestart.triggered.connect(self.restart_utility)
@@ -373,7 +380,35 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         except FileNotFoundError:
             pass
         
-
+    '''
+    Utility Menu
+    _____________________________________________________________________________________________
+    '''
+    def run_libinput_gestures(self):
+        """Start libinput-gestures in background"""
+        if self.installed:
+            #subprocess.run(['pkill', '-f', 'python3', '/usr/bin/libinput-gestures'], capture_output=True)
+            subprocess.Popen(['libinput-gestures'])
+            self.display_status()
+    
+    def kill_libinput_gestures(self):
+        """Fing libinput-gestures and kill it"""
+        if self.installed:
+            subprocess.run(['pkill', '-f', 'python3 /usr/bin/libinput-gestures'], capture_output=True)
+            self.display_status()
+    
+    def set_to_autostart(self):
+        """Sets libinput-gestures to autostart"""
+        if self.installed:
+            subprocess.run(['libinput-gestures-setup', 'autostart'], capture_output=True)
+            self.display_status()
+    
+    def disable_autostart(self):
+        """Set libinput-gestures to autostop"""
+        if self.installed:
+            subprocess.run(['libinput-gestures-setup', 'autostop'], capture_output=True)
+            self.display_status()
+    
     '''
     Service Menu
     _____________________________________________________________________________________________

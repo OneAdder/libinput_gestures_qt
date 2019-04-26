@@ -2,11 +2,12 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -46,7 +47,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addLayout(self.verticalLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 791, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 791, 38))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -86,6 +87,8 @@ class Ui_MainWindow(object):
         self.actionKill.setObjectName("actionKill")
         self.actionSet_to_autostart = QtWidgets.QAction(MainWindow)
         self.actionSet_to_autostart.setObjectName("actionSet_to_autostart")
+        self.actionDisable_autostart = QtWidgets.QAction(MainWindow)
+        self.actionDisable_autostart.setObjectName("actionDisable_autostart")
         self.menuFile.addAction(self.actionRefresh)
         self.menuFile.addAction(self.actionSet_to_default_KDE)
         self.menuFile.addAction(self.actionImport_config_file)
@@ -98,6 +101,7 @@ class Ui_MainWindow(object):
         self.menuUtility.addAction(self.actionRun)
         self.menuUtility.addAction(self.actionKill)
         self.menuUtility.addAction(self.actionSet_to_autostart)
+        self.menuUtility.addAction(self.actionDisable_autostart)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuUtility.menuAction())
         self.menubar.addAction(self.menuService.menuAction())
@@ -131,4 +135,6 @@ class Ui_MainWindow(object):
         self.actionRun.setText(_translate("MainWindow", "Run"))
         self.actionKill.setText(_translate("MainWindow", "Kill"))
         self.actionSet_to_autostart.setText(_translate("MainWindow", "Set to autostart"))
+        self.actionDisable_autostart.setText(_translate("MainWindow", "Disable autostart"))
+
 
