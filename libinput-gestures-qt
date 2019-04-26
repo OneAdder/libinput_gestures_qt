@@ -1,4 +1,4 @@
 #!/usr/bin/python3
-from libinput_gestures_qt.main import main
+from libinput_gestures_qt import main
 if __name__ == '__main__':
     main()
