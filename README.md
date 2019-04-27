@@ -12,13 +12,6 @@ I find it too difficult and that is why I decided to make a qt-based app for lib
 ### Install
 You can install the latest release version from PyPI by running:  
 `sudo pip3 install libinput-gestures-qt`
-You can also install right from this repo (it's NOT recommended) by following this steps:
-1) Clone this repo:  
-`git clone https://github.com/OneAdder/libinput_gestures_qt`  
-2) Enter the directory:  
-`cd libinput_gestures_qt`
-3) Install the package with pip3:  
-`sudo pip3 install .`
 
 Please note, that this package doesn't specify the dependencies because installing them with pip
 breaks my pip :)  
