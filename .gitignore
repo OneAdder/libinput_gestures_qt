@@ -1,0 +1,5 @@
+.pytest_cache
+.tox
+libinput_gestures_qt.egg-info
+*/__pycache__
+

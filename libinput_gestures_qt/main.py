@@ -55,16 +55,21 @@ Functions: read_config, write_config, find_key_combo, getqdbus_name, main
 --------------
 """
 
+import os
+import re
 import sys
+import subprocess
+import functools
+from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
 from libinput_gestures_qt import main_window
 from libinput_gestures_qt import edit_window
 
-import subprocess
-from pathlib import Path
-import os
-
-import re
+# NOTE `capture_output` was introduced in 3.7
+if sys.version_info < (3, 7):
+    run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+else:
+    run = functools.partial(subprocess.run, capture_output=False)
 
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
@@ -188,6 +193,7 @@ def write_config(new_conf):
     with open(CONFIG_LOCATION, 'w') as config:
         config.write(''.join(new_conf))
 
+
 def write_defaults(defaults):
     """Write default settings and backs old config up
 
@@ -199,6 +205,7 @@ def write_defaults(defaults):
     with open(CONFIG_LOCATION, 'w') as config:
         config.write(defaults)
     return defaults
+
 
 def fix_config():
     """Fixes config
@@ -231,6 +238,7 @@ def fix_config():
                             fixed_conf.append(line)
     write_config(''.join(fixed_conf))
 
+
 def resub_config():
     """Delete multiple tabs and spaces"""
     conf = ''.join(read_config())
@@ -255,13 +263,14 @@ def find_key_combo(qt_key_combo):
             xdotool_key_combo.append(lowered_key)
     return '+'.join(xdotool_key_combo)
 
+
 def get_qdbus_name():
     """It's either 'qdbus' or 'qdbus-qt5'"""
     try:
-        subprocess.run(['qdbus'], capture_output=True)
+        run(['qdbus'])
         return 'qdbus'
     except FileNotFoundError:
-        subprocess.run(['qdbus-qt5'], capture_output=True)
+        run(['qdbus-qt5'])
         return 'qdbus-qt5'
 
 
@@ -328,13 +337,12 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.actionLicense.triggered.connect(self.show_copyleft)
         #-->
         try:
-            subprocess.run(['libinput-gestures-setup', 'status'], capture_output=True)
+            run(['libinput-gestures-setup', 'status'])
             self.installed = True
         except FileNotFoundError:
             QtWidgets.QMessageBox.about(self, "Problem", "Cannot find libinput-gestures. Are you sure it is installed correctly?")
             self.installed = False
-
-
+    
     def start_adding(self):
         """Shows EditGestures window"""
         self.adding = EditGestures(self)
@@ -393,12 +401,12 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def kill_libinput_gestures(self):
         """Fing libinput-gestures and kill it"""
         if self.installed:
-            p = subprocess.run(['ps', 'axu'], capture_output=True)
+            p = run(['ps', 'axu'])
             s = p.stdout.decode('utf-8').split('\n')
             for proc in s:
                 if 'python3' in proc and 'libinput-gestures' in proc and 'libinput-gestures-qt' not in proc:
                     try:
-                        subprocess.run(['kill', proc.split()[1]], capture_output=True)
+                        run(['kill', proc.split()[1]])
                     except Exception:
                         pass
             self.display_status()
@@ -406,13 +414,13 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def set_to_autostart(self):
         """Sets libinput-gestures to autostart"""
         if self.installed:
-            subprocess.run(['libinput-gestures-setup', 'autostart'], capture_output=True)
+            run(['libinput-gestures-setup', 'autostart'])
             self.display_status()
     
     def disable_autostart(self):
         """Set libinput-gestures to autostop"""
         if self.installed:
-            subprocess.run(['libinput-gestures-setup', 'autostop'], capture_output=True)
+            run(['libinput-gestures-setup', 'autostop'])
             self.display_status()
     
     '''
@@ -422,7 +430,7 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def display_status(self):
         """Check status of libinput-gestures and shows it in message box"""
         if self.installed:
-            status = subprocess.run(['libinput-gestures-setup', 'status'], capture_output=True)
+            status = run(['libinput-gestures-setup', 'status'])
             status = status.stdout.decode('utf-8')
             installed = 'no'
             if 'is installed' in status:
@@ -439,21 +447,21 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def restart_utility(self):
         """Runs 'libinput-gestures-setup restart', displays output in message box"""
         if self.installed:
-            status = subprocess.run(['libinput-gestures-setup', 'restart'], capture_output=True)
+            status = run(['libinput-gestures-setup', 'restart'])
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
     
     def stop_utility(self):
         """Runs 'libinput-gestures-setup stop', displays output in message box"""
         if self.installed:
-            status = subprocess.run(['libinput-gestures-setup', 'stop'], capture_output=True)
+            status = run(['libinput-gestures-setup', 'stop'])
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
     
     def start_utility(self):
         """Runs 'libinput-gestures-setup start', displays output in message box"""
         if self.installed:
-            status = subprocess.run(['libinput-gestures-setup', 'start'], capture_output=True)
+            status = run(['libinput-gestures-setup', 'start'])
             status = status.stdout.decode('utf-8')
             QtWidgets.QMessageBox.about(self, "Status", status)
 
@@ -709,12 +717,11 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         
         self.actionType.setText('Plasma action')
         self.plasmaActions = QtWidgets.QComboBox()
-        kwin_shortcuts = subprocess.run(
+        kwin_shortcuts = run(
             [
                 self.QDBUS_NAME, 'org.kde.kglobalaccel', '/component/kwin',
                 'org.kde.kglobalaccel.Component.shortcutNames'
-            ],
-            capture_output=True,
+            ]
         )
         kwin_shortcuts = kwin_shortcuts.stdout.decode('utf-8').split('\n')[:-2]
         kwin_shortcuts.sort()
@@ -785,6 +792,7 @@ def main():
     window = GesturesApp()
     window.show()
     app.exec_()
+
 
 if __name__ == '__main__':
     main()
