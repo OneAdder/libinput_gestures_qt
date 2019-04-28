@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='libinput_gestures_qt',
-      version='0.3',
+      version='0.4',
       description='Qt interface for libinput-gestures (works best with Plasma)',
       url='https://github.com/OneAdder/libinput_gestures_qt',
       author='Michael Voronov',
