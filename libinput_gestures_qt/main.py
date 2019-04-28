@@ -66,10 +66,10 @@ from libinput_gestures_qt import main_window
 from libinput_gestures_qt import edit_window
 
 # NOTE `capture_output` was introduced in 3.7
-if sys.version_info < (3, 7):
+if sys.version_info.minor < 7:
     run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 else:
-    run = functools.partial(subprocess.run, capture_output=False)
+    run = functools.partial(subprocess.run, capture_output=True)
 
 HOME = str(Path.home())
 CONFIG_LOCATION = HOME + '/.config/libinput-gestures.conf'
