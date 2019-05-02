@@ -9,7 +9,6 @@ setup(
     author_email='mikivo@list.ru',
     license='GPLv3',
     packages=['libinput_gestures_qt'],
-    install_requires=['PyQt5'],
     extras_require={
         'dev': ['pytest']
     },
