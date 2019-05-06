@@ -36,13 +36,13 @@ To also install packages for testing, do:
 
 ## Features
 1) Handsome main window with current configuration displayed in human-readable form:
-![image](https://user-images.githubusercontent.com/19834976/56821309-9521b080-6856-11e9-8a2c-ee12b31c9fa4.png)
+![Screenshot_20190506_162447](https://user-images.githubusercontent.com/19834976/57229029-d61b8100-701d-11e9-8d50-24ba05e621f0.png)
 2) Adding new gestures.  
-It's possible to map a gesture to a command, keyboard shortcut or kwin shortcut (via `qdbus`):
-![image](https://user-images.githubusercontent.com/19834976/56820851-9c948a00-6855-11e9-9768-9985e0e1f868.png)
-![image](https://user-images.githubusercontent.com/19834976/56820873-afa75a00-6855-11e9-9119-22e52acacda9.png)
-![image](https://user-images.githubusercontent.com/19834976/56820924-cea5ec00-6855-11e9-976f-980508316027.png)
+It's possible to map a gesture to a kwin shortcut (via `qdbus`), keyboard shortcut or command:
+![Screenshot_20190506_162626](https://user-images.githubusercontent.com/19834976/57228830-6907eb80-701d-11e9-97e1-64f1d013cded.png)
+![Screenshot_20190506_162545](https://user-images.githubusercontent.com/19834976/57228941-a4a2b580-701d-11e9-8f6d-9de2c349d638.png)
+![Screenshot_20190506_162529](https://user-images.githubusercontent.com/19834976/57228987-c1d78400-701d-11e9-846b-5f338d43f4de.png)
 3) Set gestures to some defaults:  
-![image](https://user-images.githubusercontent.com/19834976/56820982-ef6e4180-6855-11e9-875d-a573157dada2.png)
+![Screenshot_20190506_162652](https://user-images.githubusercontent.com/19834976/57228798-5392c180-701d-11e9-8489-2ce356314322.png)
 4) Control libinput-gestures-setup.  
-![image](https://user-images.githubusercontent.com/19834976/56821022-04e36b80-6856-11e9-996c-e0db2c26e9f7.png)
+![Screenshot_20190506_164259](https://user-images.githubusercontent.com/19834976/57229103-006d3e80-701e-11e9-8e6d-42f770a4a207.png)
