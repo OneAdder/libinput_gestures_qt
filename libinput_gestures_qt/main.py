@@ -619,6 +619,11 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             deleteButton.clicked.connect(self.delete_entry)
             flay.addWidget(deleteButton, i, 4)
 
+            editButton = QtWidgets.QPushButton("Edit")
+            editButton.setAccessibleName(button)
+            editButton.clicked.connect(self.edit_entry)
+            flay.addWidget(editButton, i, 5)
+
         self.layout.addWidget(self.area)
 
     '''
@@ -647,6 +652,25 @@ class GesturesApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                         new_conf.append(line)
                 write_config(new_conf)
                 self.display_config(refresh=True)
+
+    '''
+    Edit Buttons
+    _____________________________________________________________________________________________
+
+    '''
+    def edit_entry(self):
+        button = self.sender()
+        if isinstance(button, QtWidgets.QPushButton):
+            lineToEdit = ''
+            conf = read_config()
+            for line in conf:
+                if line.startswith(button.accessibleName()):
+                    lineToEdit = line
+            print(lineToEdit)
+            self.editing = EditGestures(self, lineToEdit)
+            self.editing.setWindowModality(QtCore.Qt.WindowModal)
+            self.editing.show()
+
         
         
 class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
@@ -654,7 +678,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
     
     Child to main window (GesturesApp).
     """
-    def __init__(self, parent):
+    def __init__(self, parent, default=None):
         """init
         
         Sets widgets and their attributes that I could not set in QT Designer.
@@ -668,19 +692,55 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         
         self.QDBUS_NAME = get_qdbus_name()
 
-        self.action = 'gesture swipe up'
-        self.fingers = 3
-        self.shortcut = ''
-        
-        self.fingersLine.setMinimum(3)
-
-        self.draw_shortcut()
         self.shortcut_command.activated[str].connect(self.shortcut_command_or_qdbus)
-        
         self.actionMenu.activated[str].connect(self.action_chosen)
         self.fingersLine.valueChanged[int].connect(self.fingers_chosen)
-        
         self.saveButton.clicked.connect(self.save_changes)
+
+        self.default_line = default
+
+        if not default:
+            print("Default is none")
+            self.action = 'gesture swipe up'
+            self.fingers = 3
+            self.shortcut = ''
+            self.fingersLine.setMinimum(3)
+            self.draw_shortcut()
+        else:
+            print("Default is not none")
+            splitConf = default.split()
+            
+            """ Set gesture value """
+            gesture_syntax = ' '.join(splitConf[:3])
+            gesture_key = ''
+            for gesture, syntax in actions_mapping.items():
+                if syntax == gesture_syntax:
+                    gesture_key = gesture
+            self.action = gesture_syntax
+            self.actionMenu.setCurrentIndex(list(actions_mapping.keys()).index(gesture_key))
+            self.action_chosen(self.actionMenu.currentText())
+
+            """ Set finger value """
+            self.fingers_chosen(splitConf[3])
+            self.fingersLine.setValue(int(self.fingers))
+
+            action = splitConf[4]
+            if action == 'xdotool':
+                self.shortcut_command.setCurrentIndex(0)
+                self.draw_shortcut()
+                self.keyboardLine.setKeySequence(splitConf[6])
+            elif action == 'qdbus':
+                self.shortcut_command.setCurrentIndex(1)
+                if self.QDBUS_NAME:
+                    self.draw_plasma_actions(re.findall('"(.*?)"', default)[0])
+                    self.plasma_action_chosen(self.plasmaActions.currentText())
+            else:
+                self.shortcut_command.setCurrentIndex(2)
+                self.draw_command()
+                self.commandLine.setText(splitConf[4])
+                self.command_chosen(self.commandLine.text())
+
+            # self.shortcut_command_or_qdbus(self.shortcut_command.currentText)
 
     def shortcut_command_or_qdbus(self, text):
         """Chose whether you want to add plain command, xdotool command using QKeySequenceEdit or qdbus command
@@ -688,6 +748,8 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         Does not delete previous widgets: they are stored one upon another.
         HELP NEEDED -- it works but it's stupid :(
         """
+
+        print("here: " + text)
         if text == 'Keyboard Shortcut':
             self.draw_shortcut()
         elif text == 'Plasma action':
@@ -708,7 +770,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         self.gridLayout.addWidget(self.keyboardLine, 4, 2)
         self.keyboardLine.keySequenceChanged.connect(self.shortcut_chosen)
 
-    def draw_plasma_actions(self):
+    def draw_plasma_actions(self, default=None):
         """Draws Plasma actions combobox input
         
         ... so that user could just choose action for Plasma
@@ -728,6 +790,10 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
         for kwin_shortcut in kwin_shortcuts:
             self.plasmaActions.addItem(kwin_shortcut)
         self.gridLayout.addWidget(self.plasmaActions, 4, 2)
+
+        if default:
+            print(default)
+            self.plasmaActions.setCurrentIndex(kwin_shortcuts.index(default))
         
         self.plasmaActions.activated[str].connect(self.plasma_action_chosen)
         
@@ -763,6 +829,7 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
 
     def command_chosen(self, text):
         """Event when command is typed in"""
+        print(text)
         self.shortcut = text
 
     def plasma_action_chosen(self, text):
@@ -774,9 +841,15 @@ class EditGestures(QtWidgets.QWidget, edit_window.Ui_Form):
             conf = read_config()
             new_conf = []
             for line in conf:
-                if not line.startswith('{} {}'.format(self.action, str(self.fingers))):
+                if not self.default_line: 
                     new_conf.append(line)
-            new_conf.append('{} {} {}\n'.format(self.action, str(self.fingers), self.shortcut))
+                else:
+                    if line == self.default_line:
+                        new_conf.append('{} {} {}\n'.format(self.action, str(self.fingers), self.shortcut))
+                    else:
+                        new_conf.append(line)
+            if not self.default_line:
+                new_conf.append('{} {} {}\n'.format(self.action, str(self.fingers), self.shortcut))
             write_config(new_conf)
             self.actionMenu.setCurrentIndex(0)
             self.fingersLine.setValue(0)
